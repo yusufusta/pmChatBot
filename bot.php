@@ -4,16 +4,27 @@ use Jajo\JSONDB;
 
 $Bot = new Boting\Boting();
 if (file_exists(__DIR__ . '/.env')) {
-    $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
+    $dotenv = Dotenv\Dotenv::createUnsafeImmutable(__DIR__);
     $dotenv->load();
 }
 
+
+if (file_exists(__DIR__ . '/language/default.json')) {
+    $LANG = json_decode(file_get_contents("./language/default.json"), true);
+} else {
+    $LANG = json_decode('{
+        "START": "Merhaba! Bu botu @Fusuf\'a ulaşmak için kullanabilirsiniz. Mesaj/ses/sticker/gif/dosya/fotoğraf atabilirsiniz. Admin\'im bunu en yakın zamanda görüp cevaplıyacaktır.",
+        "ERROR_REPLY": "*Lütfen bir mesaja yanıt ver.*",
+        "ERROR_NOTFOUND": "*Mesaj veritabanında bulunamadı. Yanıt gönderemezsiniz.*",
+        "SENDER": "*Gönderen kişi:*"
+    }', true);
+}
 
 if (empty(getenv("ADMIN_ID"))) {
     echo "Please give admin id";
     $Admin = 452321614;
 } else {
-    $Admin = $_ENV["ADMIN_ID"];
+    $Admin = getenv("ADMIN_ID");
 }
 
 if (empty(getenv("DB_TUR"))) {
@@ -26,7 +37,9 @@ if (empty(getenv("DB_TUR"))) {
     } elseif (getenv("DB_TUR") == "db") {
         $tur = 1;
         if (empty(getenv("DATABASE_URL"))) {
-            $url = parse_url($_ENV["CLEARDB_DATABASE_URL"]);
+            $tur = 0;
+            $db = new JSONDB( __DIR__ );
+            return;
         } else {
             $url = parse_url($_ENV["DATABASE_URL"]);
         }
@@ -45,42 +58,17 @@ if (empty(getenv("DB_TUR"))) {
     }
 }
 
-$START = "Merhaba! Bu botu @Fusuf'a ulaşmak için kullanabilirsiniz. Mesaj/ses/sticker/gif/dosya/fotoğraf atabilirsiniz. Admin'im bunu en yakın zamanda görüp cevaplıyacaktır.";
+foreach (glob("./commands/*.php") as $dosya) {
+    include($dosya);
+}
 
-$Bot->command("/\/start/", function ($Update, $Match) use ($Bot, $START) {
-    $Bot->sendMessage(["chat_id" => $Update["message"]["chat"]["id"], "parse_mode" => "markdown", "text" => $START]);
-});
-
-$Bot->command("/\/link/", function ($Update, $Match) use ($Bot, $db, $tur) {
-    if (empty($Update["message"]["reply_to_message"]["message_id"])) {
-        $Bot->sendMessage(["chat_id" => $Update["message"]["chat"]["id"], "parse_mode" => "markdown", "text" => "*Lütfen bir mesaja yanıt verin.*"]);   
-    }
-    $MId = $Update["message"]["reply_to_message"]["message_id"];
-    if ($tur == 0) {
-        $fid = $db->select('fid, fmid, fname, fusername')
-        ->from('msg.json')
-        ->where(['mid' => $MId])
-        ->get()[0];
-    } else {
-        $query = $db->prepare("SELECT fid, fmid, fname, fusername FROM msg WHERE mid = " . $MId);
-        $query->execute();
-        $fid = $query->fetch();
-    }
-if (empty($fid)) {
-        $Bot->sendMessage(["chat_id" => $Update["message"]["chat"]["id"], "reply_to_message_id" => $Update["message"]["message_id"], "parse_mode" => "markdown", "text" => "*Mesaj veritabanında bulunamadı. Yanıt gönderemezsiniz.*"]); 
-        return;
-    }
-        
-    $Bot->sendMessage(["chat_id" => $Update["message"]["chat"]["id"], "parse_mode" => "markdown", "text" => "*İşte aradığınız kullanıcı:* [" . $fid["fname"] . "](tg://user?id=" . $fid["fid"] . ")\n*Kullanıcı adı:* @" . $fid["fusername"]]);
-});
-
-$Bot->on(["animation", "audio", "document", "photo", "sticker", "video", "video_note", "voice", "contact", "dice", "location", "text"], function ($Update) use ($Bot, $Admin, $db, $tur) {
+$Bot->on(["animation", "audio", "document", "photo", "sticker", "video", "video_note", "voice", "contact", "dice", "location", "text"], function ($Update) use ($Bot, $Admin, $db, $tur, $LANG) {
     if ($Update["message"]["chat"]["type"] !== "private") {
         return;
     }
     if ($Update["message"]["chat"]["id"] == $Admin) {
         if(empty($Update["message"]["reply_to_message"])) {
-            $Bot->sendMessage(["chat_id" => $Update["message"]["chat"]["id"], "reply_to_message_id" => $Update["message"]["message_id"], "parse_mode" => "markdown", "text" => "**Lütfen bir mesaja yanıt ver.**"]); 
+            $Bot->sendMessage(["chat_id" => $Update["message"]["chat"]["id"], "reply_to_message_id" => $Update["message"]["message_id"], "parse_mode" => "markdown", "text" => $LANG["ERROR_REPLY"]]); 
             return;
         } else {
             $MId = $Update["message"]["reply_to_message"]["message_id"];
@@ -95,7 +83,7 @@ $Bot->on(["animation", "audio", "document", "photo", "sticker", "video", "video_
                 $fid = $query->fetch();
             }
             if (empty($fid)) {
-                $Bot->sendMessage(["chat_id" => $Update["message"]["chat"]["id"], "reply_to_message_id" => $Update["message"]["message_id"], "parse_mode" => "markdown", "text" => "*Mesaj veritabanında bulunamadı. Yanıt gönderemezsiniz.*"]); 
+                $Bot->sendMessage(["chat_id" => $Update["message"]["chat"]["id"], "reply_to_message_id" => $Update["message"]["message_id"], "parse_mode" => "markdown", "text" => $LANG["ERROR_NOTFOUND"]]); 
                 return;
             }
             
@@ -140,7 +128,7 @@ $Bot->on(["animation", "audio", "document", "photo", "sticker", "video", "video_
     } else {
         $id = $Bot->forwardMessage(["chat_id" => $Admin, "from_chat_id" => $Update["message"]["chat"]["id"], "message_id" => $Update["message"]["message_id"]])["result"]["message_id"];
         if (!empty($Update["message"]["sticker"])) {
-            $Bot->sendMessage(["chat_id" => $Admin, "parse_mode" => "markdown", "reply_to_message_id" => $id, "text" => "*Gönderen kişi:* [" . $Update["message"]["from"]["first_name"] . "](tg://user?id=" . $Update["message"]["chat"]["id"] . ")"]); 
+            $Bot->sendMessage(["chat_id" => $Admin, "parse_mode" => "markdown", "reply_to_message_id" => $id, "text" => $LANG["sender"] . " [" . $Update["message"]["from"]["first_name"] . "](tg://user?id=" . $Update["message"]["chat"]["id"] . ")"]); 
         }
         if (!empty($Update["message"]["from"]["username"])) {
             $username = $Update["message"]["from"]["username"];
@@ -159,5 +147,6 @@ if (empty(getenv("BOT_TOKEN"))) {
     echo "Please add token";
     die();
 } else {
+    echo "bot started";
     $Bot->Handler(getenv("BOT_TOKEN"));
 }
