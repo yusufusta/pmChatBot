@@ -1,0 +1,10 @@
+{
+    "require": {
+        "quiec/boting": "dev-master",
+        "jajo/jsondb": "^2.1",
+        "vlucas/phpdotenv": "^5.0",
+        "ext-pdo": "*",
+        "ext-pgsql": "*",
+        "ext-pdo_pgsql": "*"
+    }
+}
