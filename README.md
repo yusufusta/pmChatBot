@@ -2,11 +2,11 @@
 A simple feed-back bot written in [Boting](https://github.com/Quiec/Boting). It is similar to the Livegram bot.
 
 [🇹🇷 Türkçe](https://github.com/Quiec/pmChatBot/blob/master/README-tr.md) | [🇬🇧 English](https://github.com/Quiec/pmChatBot/blob/master/README.md) 
-## Upload
-### Simple Method
+## Install
+### Easy
 [![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
 
-### Difficult Method
+### Hard
 ```sh
 git clone https://github.com/Quiec/pmChatBot
 cd pmChatBot
@@ -16,14 +16,14 @@ nano .env
 php bot.php
 ```
 
-## Env file
+## Example Env File
 ```env
 DB_TUR="json"
 BOT_TOKEN="BOT TOKEN"
 ADMIN_ID="ID'IN"
 ```
 
-## Properties
+## Features
 * Suitable for privacy settings
 * Heroku support
 * JSON Language File (We can edit the articles inside.)
