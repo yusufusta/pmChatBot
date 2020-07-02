@@ -1,6 +1,6 @@
 {
-    "START": "Merhaba! Bu botu @Fusuf'a ulaşmak için kullanabilirsiniz. Mesaj/ses/sticker/gif/dosya/fotoğraf atabilirsiniz. Admin'im bunu en yakın zamanda görüp cevaplıyacaktır.",
-    "ERROR_REPLY": "*Lütfen bir mesaja yanıt ver.*",
-    "ERROR_NOTFOUND": "*Mesaj veritabanında bulunamadı. Yanıt gönderemezsiniz.*",
-    "SENDER": "*Gönderen kişi:*"
+    "START": "Hi, You can message my owner with this bot. You can send any media. My owner will reply ur message ASAP!",
+    "ERROR_REPLY": "*Please reply an message.*",
+    "ERROR_NOTFOUND": "*Message not found in database. Can't reply.*",
+    "SENDER": "*Sender:*"
 }
