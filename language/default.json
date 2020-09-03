@@ -1,6 +1,6 @@
 {
-    "START": "Hi, You can message my owner with this bot. You can send any media. My owner will reply ur message ASAP!",
-    "ERROR_REPLY": "*Please reply an message.*",
+    "START": "Hi, You can contact the owners of @Foundation_9and10 through this bot. You can send any query here. Admins will reply ur message ASAP!",
+    "ERROR_REPLY": "*Please reply to a message.*",
     "ERROR_NOTFOUND": "*Message not found in database. Can't reply.*",
     "SENDER": "*Sender:*"
 }
