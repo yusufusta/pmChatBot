@@ -24,10 +24,24 @@
       "value": "452321614",
       "required": false
     }
-  },
+   },
   "addons": [
     {
-      "plan": "heroku-postgresql"
+    "plan": "heroku-postgresql",
+      "options": {
+        "version": "12"
+      }
     }
-  ]
+  ],
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "eco"
+    }
+  }
 }
